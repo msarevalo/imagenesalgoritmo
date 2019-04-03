@@ -28,6 +28,26 @@ def salir():
     if valor:
         raiz.destroy()
 
+def load_data(path, pattern):
+    class_names={}
+    class_id=0
+    x = []
+    y = []
+    for d in glob.glob(os.path.join(path, '*')):
+        clname = os.path.basename(d)
+        for f in glob.glob(os.path.join(d, pattern)): 
+            if not clname in class_names:
+                class_names[clname]=class_id 
+                class_id += 1
+            img = image.load_img(f, target_size=(224, 224))
+            npi = image.img_to_array(img)     
+            npi = preprocess_input(npi)
+            for i in range(4):
+                npi=np.rot90(npi, i)
+                x.append(npi)
+                y.append(class_names[clname])
+    return np.array(x), np.array(y), class_names
+
 def abrefichero(path, pattern):
     fichero=filedialog.askopenfilename(title="Abrir Archivo", filetypes=(("Imagenes", "*.jpg"), ("Imagenes", "*.png"), ("Imagenes", "*.jpeg")))
     class_names={}
@@ -50,7 +70,8 @@ def abrefichero(path, pattern):
     return np.array(x), np.array(y), class_names
 
 
-x, y, class_names = ('C:\\Animales', '*.jpg')
+
+x, y, class_names = load_data('C:/Animales', '*.jpg')
 num_classes = len(class_names)
 
 
@@ -78,6 +99,7 @@ model.fit(x_train, y_train, batch_size=128, epochs=1, verbose=1, validation_spli
 score = model.evaluate(x_test, y_test, verbose=0)
 
 
+#Interfaz Grafica
 raiz.title("Analisis de Imagenes")
 #raiz.geometry("500x500")
 raiz.config(bg="#858585")
